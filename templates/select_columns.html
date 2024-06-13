@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sélectionner les colonnes</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+
+<div class="container">
+    <div class="tab">
+        <button class="tablinks" onclick="openTab(event, 'extract')">Extraire les données</button>
+        <button class="tablinks" onclick="openTab(event, 'visualize')">Générer la visualisation</button>
+    </div>
+
+    <!-- Section pour extraire les données -->
+    <div id="extract" class="tabcontent">
+        <h3>Sélectionner les colonnes à extraire</h3>
+        <form id="column-form" action="/download" method="post">
+            <input type="hidden" name="filename" value="{{ filename }}">
+            {% for column in columns %}
+                <div class="column-options">
+                    <div>
+                        <input type="checkbox" name="columns" value="{{ column }}">
+                        <label>{{ column }}</label>
+                    </div>
+                    <div class="column-options-sub">
+                        <input type="checkbox" name="normalize" value="{{ column }}">
+                        <label>Normaliser</label>
+                    </div>
+                    <div class="column-options-sub">
+                        <input type="text" name="rename_{{ column }}" value="{{ column }}">
+                    </div>
+                    <div class="column-options-sub">
+                        <label for="missing_{{ column }}">Valeurs manquantes:</label>
+                        <select name="missing_{{ column }}">
+                            <option value="leave">Laisser tel quel</option>
+                            <option value="mean">Remplacer par la moyenne</option>
+                            <option value="remove">Supprimer les lignes</option>
+                        </select>
+                    </div>
+                </div>
+            {% endfor %}
+            <input type="submit" value="Extraire les données">
+            <input type="button" value="Afficher les statistiques" onclick="showStatistics()">
+        </form>
+
+        <!-- Statistiques -->
+        <div class="statistics" id="statistics"></div>
+    </div>
+
+    <!-- Section pour la visualisation -->
+    <div id="visualize" class="tabcontent">
+        <h3>Sélectionner les colonnes pour la visualisation</h3>
+        <form id="visualization-form" onsubmit="generateVisualization(event)">
+            <input type="hidden" name="filename" value="{{ filename }}">
+            <div>
+                <label for="columns">Sélectionner les colonnes :</label>
+                <select id="columns" name="columns" multiple>
+                    {% for column in columns %}
+                        <option value="{{ column }}">{{ column }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label for="chart_type">Type de graphique :</label>
+                <select id="chart_type" name="chart_type" onchange="showChartDescription()">
+                    <option value="hist">Histogramme</option>
+                    <option value="scatter">Nuage de points</option>
+                    <option value="line">Graphique linéaire</option>
+                    <option value="boxplot">Boxplot</option>
+                    <option value="barplot">Barplot</option>
+                    <option value="piechart">Pie Chart</option>
+                    <option value="heatmap">Heatmap</option>
+                </select>
+                <input type="submit" value="Générer la visualisation">
+            </div>
+        </form>
+        
+        <!-- Visualisation -->
+        <div class="visualization" id="statistics-visualize"></div>
+
+        <!-- Description du graphique -->
+        <div id="chart-description" style="margin-top: 20px;">
+            <h3>Descriptions des Graphes</h3>
+            <p><b>Histogramme (Histogram)</b><br>
+            Nombre de colonnes : 1<br>
+            Type de données : Numérique<br>
+            Description : Un histogramme montre la distribution des valeurs dans une colonne numérique.<br>
+            Exemple de sélection : Colonne A (numérique)</p>
+
+            <p><b>Nuage de points (Scatter plot)</b><br>
+            Nombre de colonnes : 2<br>
+            Type de données : Numérique<br>
+            Description : Un nuage de points montre la relation entre deux colonnes numériques.<br>
+            Exemple de sélection : Colonne A (numérique) et Colonne B (numérique)</p>
+
+            <p><b>Graphique linéaire (Line chart)</b><br>
+            Nombre de colonnes : 2<br>
+            Type de données : Numérique<br>
+            Description : Un graphique linéaire montre la tendance des valeurs de deux colonnes numériques, généralement dans une série temporelle.<br>
+            Exemple de sélection : Colonne A (numérique) et Colonne B (numérique)</p>
+
+            <p><b>Boxplot</b><br>
+            Nombre de colonnes : 1 ou plus<br>
+            Type de données : Numérique<br>
+            Description : Un boxplot montre la distribution des valeurs dans une ou plusieurs colonnes numériques, y compris les valeurs aberrantes.<br>
+            Exemple de sélection : Colonne A (numérique), Colonne B (numérique)</p>
+
+            <p><b>Barplot</b><br>
+            Nombre de colonnes : 1<br>
+            Type de données : Catégorielle<br>
+            Description : Un barplot montre la fréquence ou la proportion des différentes catégories dans une colonne catégorielle.<br>
+            Exemple de sélection : Colonne A (catégorielle)</p>
+
+            <p><b>Pie Chart</b><br>
+            Nombre de colonnes : 1<br>
+            Type de données : Catégorielle<br>
+            Description : Un pie chart montre la proportion des différentes catégories dans une colonne catégorielle sous forme de parts d'un cercle.<br>
+            Exemple de sélection : Colonne A (catégorielle)</p>
+
+            <p><b>Heatmap</b><br>
+            Nombre de colonnes : 2 ou plus<br>
+            Type de données : Numérique<br>
+            Description : Une heatmap montre la corrélation entre plusieurs colonnes numériques sous forme de matrice colorée.<br>
+            Exemple de sélection : Colonne A (numérique), Colonne B (numérique), Colonne C (numérique)</p>
+        </div>
+
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
+
